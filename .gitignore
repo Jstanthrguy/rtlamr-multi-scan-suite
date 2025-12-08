@@ -205,3 +205,34 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Binaries / external tools
+bin/
+*.exe
+*.out
+
+# Python bytecode & caches
+__pycache__/
+*.pyc
+
+# Local script history / scratch
+scripts/Archive/
+scripts/archive/
+
+# Logs and runtime data
+logs/
+state/
+
+# Raw capture / meter data
+*.jsonl
+*.csv
+*.txt
+*.raw
+*.iq
+*.iq8
+*.dat
+
+# Virtual environments
+.env/
+venv/
+ENV/
