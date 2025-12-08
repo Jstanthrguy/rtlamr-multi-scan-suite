@@ -1,130 +1,246 @@
 # rtlamr-multi-scan-suite
 A modular sweep-and-analysis toolkit for rtlamr that performs full ISM band scans, derives core center frequencies, and enables focused multi-frequency monitoring and per-radio targeting.
-# rtlamr Multi-Scan Suite
+rtlamr Multi-Scan Suite
 
-A modular sweep-and-analysis toolkit that extends rtlamr with full-band ISM (902–928 MHz) scanning, core center-frequency extraction, focused multi-frequency monitoring, and per-radio targeting. Designed as a layered workflow for RF operators who want structured, repeatable, laboratory-grade AMR spectrum exploration.
+A layered sweep-and-analysis toolkit for AMR signal intelligence across the 902–928 MHz ISM band.
 
----
+The Multi-Scan Suite extends rtlamr with a full-band ISM sweep engine, adaptive center-frequency extraction, a focused multi-channel scanning loop, and automated per-radio targeting tools.
+It is designed for RF operators who want structured, repeatable, laboratory-grade AMR spectrum exploration.
 
-## Why This Exists
+Why This Exists
 
-Most AMR meter deployments do not sit neatly on the seven “standard” rtlamr frequencies.  
-Utilities scatter transmissions across the ISM band, and signal behavior varies widely by region.
+AMR deployments rarely sit on the “standard” rtlamr center frequencies.
+Utilities spread devices across the ISM band, and burst patterns vary dramatically by geography, vendor, and meter type.
 
-This project was built to reveal that structure.
+This suite exposes that structure.
 
-The Multi-Scan Suite provides the missing layers around rtlamr:
+It provides the missing layers around rtlamr:
 
-- wideband discovery,
-- automated frequency intelligence,
-- adaptive core-band selection,
-- and a focused monitor loop.
+Wideband discovery of all active AMR activity
 
-It turns raw ISM activity into an actionable RF map — and gives operators the tools to explore meters in their native environment.
+Automated frequency intelligence extracted from real sweeps
 
----
+Adaptive core-band selection based on message density
 
-## Features
+A focused monitor loop tuned to the strongest channels
 
-- **Full ISM Sweep (902–928 MHz)**  
-  300 kHz stepping, operator-defined dwell time, structured logs.
+Per-radio recommendations for direct rtlamr usage
 
-- **Adaptive Core Frequency Analyzer**  
-  Extracts the strongest N center frequencies from any sweep.
+The result is an actionable RF map: a repeatable, data-driven view into the AMR ecosystem where you live.
 
-- **Focused Multi-Frequency Core Scan**  
-  Efficient looping over only the most active channels.
+Features
+1. Full ISM Sweep (902–928 MHz)
 
-- **Per-Radio Targeting**  
-  Auto-suggested rtlamr commands for individual meters.
+Stepped sweep (default 300 kHz)
 
-- **Flexible Band Window**  
-  Customizable ISM min/max, adjustable step size.
+Operator-defined dwell time
 
-- **Structured Logging**  
-  Timestamped run directories with raw JSONL + summaries.
+Consistent directory structure
 
-- **Dry-Run & Sanity Check Modes**  
-  For safe testing before long sweeps.
+Raw JSONL logs + text summaries
 
----
+2. Adaptive Core Frequency Analyzer
 
-## Usage (Basic Examples)
+Reduces 80–90 sweep frequencies → top N centers
 
-**Run a wideband ISM sweep:**
+Weighted selection by message density
 
-~/rtlamr/scripts/rtlamr_multi_scan.py
---ism-sweep
---ism-seconds-per-freq 40
---rtlamr ~/rtlamr/bin/rtlamr
---server 127.0.0.1:1234
+Produces core_freqs.json, radios.json, and suggestions
 
-markdown
-Copy code
+3. Focused Multi-Frequency Core Scan
 
-**Analyze sweep results:**
+Cycles only through the important frequencies
 
-python3 rtlamr_scan_analyzer.py
---summary /path/to/summary.txt
---core-count 2
+Significantly lower CPU and noise load
 
-css
-Copy code
+Ideal for long-term observation and per-radio study
 
-**Run a focused core scan:**
+4. Per-Radio Targeting
 
-~/rtlamr/scripts/rtlamr_multi_scan.py
---core-json /path/to/core_freqs.json
---seconds-per-freq 120
---rtlamr ~/rtlamr/bin/rtlamr
+Auto-suggested rtlamr commands for individual meters
 
-css
-Copy code
+Useful for studying behavior, burst timing, and drift
 
-**Track a specific meter:**
+5. Flexible Band Window
 
+Adjustable ISM min/max
+
+Adjustable step size and dwell time
+
+Supports “full sweep” or “narrow window” operation
+
+6. Structured Logging
+
+Timestamped run directories
+
+Raw decode logs
+
+Final summaries
+
+Analyzer products (core frequencies, radio listings, suggestions)
+
+7. Dry-Run & Operator Safety Modes
+
+Allows validation before committing to long sweeps or multi-hour scans
+
+Installation
+Requirements
+
+Linux (Debian recommended)
+
+Python 3.11+
+
+rtlamr binary (built locally or installed)
+
+rtl_tcp server (RTL-SDR dongle), or any backend supported by rtlamr
+
+A stable SDR gain configuration
+
+Clone and prepare:
+
+git clone https://github.com/<yourname>/rtlamr-multiscan.git
+cd rtlamr-multiscan
+
+
+Directory structure:
+
+rtlamr/
+├── scripts/
+│   ├── rtlamr_multi_scan.py
+│   └── rtlamr_scan_analyzer.py
+├── config/
+├── docs/
+└── logs/   (ignored by git)
+
+Usage Examples
+1. Full ISM Sweep
+~/rtlamr/scripts/rtlamr_multi_scan.py \
+    --ism-sweep \
+    --ism-seconds-per-freq 40 \
+    --rtlamr ~/rtlamr/bin/rtlamr \
+    --server 127.0.0.1:1234
+
+
+This produces a timestamped directory under:
+
+logs/ism_sweeps/<timestamp>/
+    raw.jsonl
+    summary.txt
+
+2. Analyze Sweep Results
+python3 ~/rtlamr/scripts/rtlamr_scan_analyzer.py \
+    --summary /path/to/summary.txt \
+    --core-count 2
+
+
+Creates:
+
+core_freqs.json
+radios.json
+suggested_rtlamr_commands.txt
+
+3. Run a Focused Core Scan
+~/rtlamr/scripts/rtlamr_multi_scan.py \
+    --core-json ~/rtlamr/logs/ism_sweeps/<ts>/core_freqs.json \
+    --seconds-per-freq 120 \
+    --rtlamr ~/rtlamr/bin/rtlamr
+
+
+Optimized for long-term monitoring.
+
+4. Track a Specific Meter
 rtlamr -filterid=<ID> -format=json
 
-yaml
-Copy code
 
----
+Ideal for:
 
-## Full Workflow
+analyzing burst intervals
 
-1. **ISM Sweep**  
-   Discover all active ISM centers in your region.
+understanding meter vendor IDs
 
-2. **Analyzer Phase**  
-   Reduce 87 stepped frequencies → the strongest core set.
+tracking drift or channel movement
 
-3. **Core Multi-Scan**  
-   Efficient monitoring of only the important channels.
+density estimation for deployment mapping
 
-4. **rtlamr Targeting**  
-   Track individual radio IDs, types, or behaviors.
+Workflow Overview
+[1] ISM Sweep  →  Discover activity across 902–928 MHz
+[2] Analyzer    →  Reduce full sweep → N strongest centers
+[3] Core Scan   →  Monitor those centers efficiently
+[4] Targeting   →  Study chosen radios using suggested commands
 
----
 
-## Acknowledgments
+This tiered flow transforms raw RF activity into structured intelligence.
 
-This project builds on the excellent work of the original **rtlamr** developer, Ben Damman.  
-Without that foundation, none of this layered system would exist.  
-His work opened the door for exploration — this suite walks through it.
+Directory Layout
+rtlamr/
+├── scripts/
+│   ├── rtlamr_multi_scan.py
+│   └── rtlamr_scan_analyzer.py
+├── config/
+├── docs/
+├── logs/              (ignored)
+│   ├── ism_sweeps/
+│   ├── core_scans/
+│   ├── raw/
+│   └── summaries/
+└── state/             (ignored)
 
----
+Sample Output Structure
 
-## Future Plans
+After a sweep:
 
-- GUI dashboard (Python + FastAPI + Web front end)
-- Real-time multi-radio grouping and clustering
-- Cross-scan correlation tools
-- Auto-detected drift windows
-- Integration with rtl_power for hybrid RF intelligence
-- Additional analysis modules (behavior timelines, burst density, etc.)
+logs/ism_sweeps/scan_20251207_155024/
+│
+├── raw.jsonl
+├── summary.txt
+├── core_freqs.json
+├── radios.json
+└── suggested_rtlamr_commands.txt
 
----
+
+After a core scan:
+
+logs/core_scans/scan_<timestamp>/
+│
+├── raw.jsonl
+└── summary.txt
+
+Notes on SDR Configuration
+
+This project assumes:
+
+stable RF gain settings
+
+the operator understands noise floor effects
+
+center-frequency selection may vary by location
+
+rtlamr must be able to decode on the chosen hardware
+
+All real-world AMR deployments behave differently.
+This toolkit is built for exploration — not prediction.
+
+Acknowledgments
+
+This project builds on the excellent work of Ben Damman, the original author of rtlamr.
+His decoder opened the ISM band to operators everywhere.
+This suite extends that exploration with workflow structure and real-time intelligence.
+
+Future Plans
+
+GUI dashboard (FastAPI + Web front end)
+
+Cluster analysis for multi-radio behavior
+
+Burst timing histograms & drift detection
+
+Correlation between sweeps and long-term stability
+
+Hybrid integration with rtl_power waterfall intelligence
+
+Optional Python package release
 
 ## License
 
-Released under the MIT License. Contributions welcome.
+Released under the MIT License.
+Contributions welcome.
