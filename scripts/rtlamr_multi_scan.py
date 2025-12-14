@@ -489,9 +489,9 @@ def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
 
     parser.add_argument(
         "--log-dir",
-        default="~/rtlamr_logs",
-        help="Directory for run logs.",
-    )
+        default="~/rtlamr/logs",
+        help="Directory for run logs (default: ~/rtlamr/logs).",
+)
     parser.add_argument(
         "--once",
         action="store_true",

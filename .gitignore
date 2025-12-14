@@ -236,3 +236,9 @@ state/
 .env/
 venv/
 ENV/
+#
+# Personal / local working files
+_archive_personal/
+README.md.pre-micropolish
+launcher_gui.py
+docs/
