@@ -188,6 +188,9 @@ def run_rtlamr_for_freq(
     accepted_msgtypes: Optional[Set[str]] = None,
     echo_hits: bool = False,
     print_cmd: bool = True,
+    agcmode: Optional[str] = None,
+    tunergainmode: Optional[str] = None,
+    tunergain: Optional[float] = None,
 ) -> Tuple[int, int, Set[str]]:
     """
     Run rtlamr once for a single center frequency, aggregating stats.
@@ -206,6 +209,14 @@ def run_rtlamr_for_freq(
         "-unique=false",
         f"-duration={seconds}s",
     ]
+
+    # Gain / AGC controls (rtltcp backend)
+    if agcmode is not None:
+        cmd.append(f"-agcmode={agcmode}")
+    if tunergainmode is not None:
+        cmd.append(f"-tunergainmode={tunergainmode}")
+    if tunergain is not None:
+        cmd.append(f"-tunergain={tunergain}")
 
     print(f"[*] Scanning {center_freq_mhz:.6f} MHz for {seconds} seconds...")
     # Command line print intentionally suppressed to avoid clutter:
@@ -429,6 +440,28 @@ def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
         help="rtlamr samplerate.",
     )
 
+    # rtlamr (rtltcp backend) gain + AGC controls (passed through to rtlamr)
+    parser.add_argument(
+        "--agcmode",
+        type=str,
+        choices=["true", "false"],
+        default=None,
+        help="Pass through to rtlamr -agcmode (rtl agc) true/false.",
+    )
+    parser.add_argument(
+        "--tunergainmode",
+        type=str,
+        choices=["true", "false"],
+        default=None,
+        help="Pass through to rtlamr -tunergainmode true/false (enables manual tuner gain).",
+    )
+    parser.add_argument(
+        "--tunergain",
+        type=float,
+        default=None,
+        help="Pass through to rtlamr -tunergain (dB). Typically used with --tunergainmode true.",
+    )
+
     # Core scan options.
     parser.add_argument(
         "--seconds-per-freq",
@@ -620,6 +653,9 @@ def run_cycle(
     log_dir: str,
     msgtype_arg: str,
     accepted_msgtypes: Optional[Set[str]],
+    agcmode: Optional[str] = None,
+    tunergainmode: Optional[str] = None,
+    tunergain: Optional[float] = None,
 ) -> None:
     """
     Run either a core scan or an ISM sweep once, with logging and live feedback.
@@ -685,6 +721,9 @@ def run_cycle(
                     type_totals=type_totals,
                     msgtype_arg=msgtype_arg,
                     accepted_msgtypes=accepted_msgtypes,
+                    agcmode=agcmode,
+                    tunergainmode=tunergainmode,
+                    tunergain=tunergain,
                     echo_hits=False,
                     print_cmd=(idx == 1),
                 )
@@ -722,6 +761,9 @@ def run_cycle(
                     type_totals=type_totals,
                     msgtype_arg=msgtype_arg,
                     accepted_msgtypes=accepted_msgtypes,
+                    agcmode=agcmode,
+                    tunergainmode=tunergainmode,
+                    tunergain=tunergain,
                     echo_hits=True,   # rolling counters, single updating line
                     print_cmd=(idx == 1),
                 )
@@ -794,6 +836,12 @@ def main(argv: Optional[List[str]] = None) -> None:
     print("    rtl_tcp -a 0.0.0.0 -g 7.7 -s 2359296")
     print(f"[*] Using remote rtl_tcp server: {args.server}")
     print(f"[*] rtlamr samplerate: {args.samplerate}")
+    if args.agcmode is not None:
+        print(f"[*] rtlamr agcmode: {args.agcmode}")
+    if args.tunergainmode is not None:
+        print(f"[*] rtlamr tunergainmode: {args.tunergainmode}")
+    if args.tunergain is not None:
+        print(f"[*] rtlamr tunergain: {args.tunergain} dB")
     print(f"[*] Using rtlamr binary: {args.rtlamr}")
     print(f"[*] Logging directory: {log_dir}")
     print(f"[*] rtlamr msgtype: {msgtype_arg}")
@@ -864,6 +912,9 @@ def main(argv: Optional[List[str]] = None) -> None:
                 log_dir=log_dir,
                 msgtype_arg=msgtype_arg,
                 accepted_msgtypes=accepted_msgtypes,
+                agcmode=args.agcmode,
+                tunergainmode=args.tunergainmode,
+                tunergain=args.tunergain,
             )
             if args.once:
                 break

@@ -241,3 +241,6 @@ ENV/
 _archive_personal/
 README.md.pre-micropolish
 launcher_gui.py
+
+# local backup artifacts
+scripts/*.bak*
